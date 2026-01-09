@@ -11,6 +11,10 @@ public class PlayerController : MonoBehaviour
     private int currentLane = 1;
     private float targetX;
     
+    [Header("Control Freeze")]
+    private bool controlsFrozen = false;
+    private float freezeEndTime = 0f;
+    
     private Rigidbody rb;
     void Start()
     {
@@ -19,7 +23,16 @@ public class PlayerController : MonoBehaviour
     }
     void Update()
     {
-        HandleInput();
+        if (controlsFrozen && Time.time >= freezeEndTime)
+        {
+            controlsFrozen = false;
+            Debug.Log("Controls unfrozen!");
+        }
+    
+        if (!controlsFrozen)
+        {
+            HandleInput();
+        }
     }
 
     void FixedUpdate()
@@ -52,5 +65,12 @@ public class PlayerController : MonoBehaviour
     void UpdateTargetX()
     {
         targetX = (currentLane - 1) * laneDistance;
+    }
+    
+    public void FreezeControls(float duration)
+    {
+        controlsFrozen = true;
+        freezeEndTime = Time.time + duration;
+        Debug.Log("Controls frozen for " + duration + " seconds!");
     }
 }
