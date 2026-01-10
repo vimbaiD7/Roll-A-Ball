@@ -6,6 +6,9 @@ public class UIManager : MonoBehaviour
 {
     public static UIManager Instance;
     
+    [Header("Pause Elements")]
+    public TextMeshProUGUI pauseScoreText;
+    
     [Header("HUD Elements")]
     public TextMeshProUGUI scoreText;
     public TextMeshProUGUI highScoreText;
@@ -84,7 +87,7 @@ public class UIManager : MonoBehaviour
     {
         if (livesText != null)
         {
-            livesText.text = "❤️ x " + lives.ToString();
+            livesText.text = " x " + lives.ToString();
         }
         
     
@@ -169,12 +172,18 @@ public class UIManager : MonoBehaviour
     public void TogglePause()
     {
         isPaused = !isPaused;
-        
+    
         if (pausePanel != null)
         {
             pausePanel.SetActive(isPaused);
+            
+            if (isPaused && pauseScoreText != null)
+            {
+                
+                pauseScoreText.text = "Current Score: " + scoreText.text.Replace("Score: ", "");
+            }
         }
-        
+    
         Time.timeScale = isPaused ? 0f : 1f;
     }
     
@@ -192,5 +201,7 @@ public class UIManager : MonoBehaviour
             gameOverPanel.SetActive(false);
         }
     }
+    
+    
     
 }

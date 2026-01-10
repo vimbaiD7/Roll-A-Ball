@@ -19,7 +19,7 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
+            //DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -151,13 +151,43 @@ public class GameManager : MonoBehaviour
 
     public void RestartGame()
     {
+        Debug.Log("Restarting game...");
         Time.timeScale = 1f;
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideGameOver();
+        }
         SceneManager.LoadScene("GameScene");
+    }
+    
+    void OnEnable()
+    {
+        // Reset game state 
+        SceneManager.sceneLoaded += OnSceneLoaded;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnSceneLoaded;
+    }
+
+    void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+    {
+        // Reset
+        if (scene.name == "GameScene")
+        {
+            ResetGame();
+        }
     }
 
     public void LoadMainMenu()
     {
+        Debug.Log("Loading main menu...");
         Time.timeScale = 1f;
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.HideGameOver();
+        }
         SceneManager.LoadScene("MainMenu");
     }
 
@@ -169,7 +199,34 @@ public class GameManager : MonoBehaviour
     public void QuitGame()
     {
         Debug.Log("Quitting Game...");
-
+        #if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+        #else
         Application.Quit();
+        #endif
+    }
+    
+    void ResetGame()
+    {
+        score = 0;
+        lives = 3;
+        level = 1;
+        currentSpeed = 10f;
+        
+        if (playerController == null)
+        {
+            GameObject player = GameObject.FindGameObjectWithTag("Player");
+            if (player != null)
+            {
+                playerController = player.GetComponent<PlayerController>();
+                if (playerController != null)
+                {
+                    playerController.moveSpeed = currentSpeed;
+                }
+            }
+        }
+    
+        UpdateUI();
+        Debug.Log("Game Reset! Lives: " + lives);
     }
 }
