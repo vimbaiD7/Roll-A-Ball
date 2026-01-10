@@ -1,6 +1,5 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
@@ -16,8 +15,6 @@ public class UIManager : MonoBehaviour
     public TextMeshProUGUI levelText;
     public GameObject newHighScoreText;
     
-    [Header("Visual Hearts (Optional)")]
-    public Image[] heartImages;
     
     [Header("Panels")]
     public GameObject pausePanel;
@@ -27,6 +24,7 @@ public class UIManager : MonoBehaviour
     [Header("Game Over Elements")]
     public TextMeshProUGUI finalScoreText;
     public TextMeshProUGUI gameOverMessageText;
+    public TextMeshProUGUI finalHighScoreText;
     
     [Header("Level Up Elements")]
     public TextMeshProUGUI levelUpText;
@@ -57,7 +55,7 @@ public class UIManager : MonoBehaviour
     
     void Update()
     {
-        // Pause with ESC key
+        // pause with ESC key
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             TogglePause();
@@ -89,21 +87,7 @@ public class UIManager : MonoBehaviour
         {
             livesText.text = " x " + lives.ToString();
         }
-        
-    
-        if (heartImages != null && heartImages.Length > 0)
-        {
-            for (int i = 0; i < heartImages.Length; i++)
-            {
-                if (heartImages[i] != null)
-                {
-                    heartImages[i].enabled = (i < lives);
-                }
-            }
-        }
     }
-    
-    // Update level display
     public void UpdateLevel(int level)
     {
         if (levelText != null)
@@ -138,52 +122,76 @@ public class UIManager : MonoBehaviour
     }
     
    
-    public void ShowGameOver(int finalScore, int highScore)
+    public void ShowGameOver(int finalScore, int oldHighScore)
     {
         if (gameOverPanel != null)
         {
             gameOverPanel.SetActive(true);
             Time.timeScale = 0f; 
-            
+        
             if (finalScoreText != null)
             {
-                finalScoreText.text = "Final Score: " + finalScore.ToString();
+                finalScoreText.text = "Score: " + finalScore.ToString();
             }
             
-         
-            if (gameOverMessageText != null)
+            bool isNewHighScore = finalScore > oldHighScore;
+        
+            if (isNewHighScore)
             {
-                if (finalScore > highScore)
+                // NEW HIGH SCORE!
+                Debug.Log("Displaying NEW HIGH SCORE screen");
+                if (highScoreText != null)
+                {
+                    highScoreText.gameObject.SetActive(false);
+                }
+                if (newHighScoreText != null)
+                {
+                    newHighScoreText.SetActive(true);
+                }
+            
+                if (gameOverMessageText != null)
                 {
                     gameOverMessageText.text = "NEW HIGH SCORE!";
                 }
-                else
+            }
+            else
+            {
+                Debug.Log("Displaying normal game over. Final: " + finalScore + " Best: " + oldHighScore);
+            
+                //  old best score
+                if (highScoreText != null)
+                {
+                    highScoreText.gameObject.SetActive(true);
+                    highScoreText.text = "Best: " + oldHighScore.ToString();
+                }
+                if (newHighScoreText != null)
+                {
+                    newHighScoreText.SetActive(false);
+                }
+            
+                if (gameOverMessageText != null)
                 {
                     gameOverMessageText.text = "GAME OVER";
                 }
             }
-            if (newHighScoreText != null)
-            {
-                newHighScoreText.SetActive(finalScore > highScore);
-            }
         }
     }
-    
     public void TogglePause()
     {
         isPaused = !isPaused;
-    
+
         if (pausePanel != null)
         {
             pausePanel.SetActive(isPaused);
-            
+        
             if (isPaused && pauseScoreText != null)
             {
-                
-                pauseScoreText.text = "Current Score: " + scoreText.text.Replace("Score: ", "");
+                // score from GameManager
+                int currentScore = GameManager.Instance != null ? GameManager.Instance.score : 0;
+                pauseScoreText.text = "Current Score: " + currentScore.ToString();
             }
         }
-    
+
         Time.timeScale = isPaused ? 0f : 1f;
     }
     

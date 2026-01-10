@@ -19,7 +19,6 @@ public class GameManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            //DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -29,7 +28,6 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Find player if not assigned
         if (playerController == null)
         {
             GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -74,8 +72,7 @@ public class GameManager : MonoBehaviour
         {
             level = newLevel;
             LevelUp();
-
-            // Speed boost every 5 levels
+            // Speed boost 
             if (level % 5 == 0)
             {
                 IncreaseSpeed();
@@ -86,14 +83,13 @@ public class GameManager : MonoBehaviour
     void LevelUp()
     {
         Debug.Log("Level Up! Now Level: " + level);
-
-        // Show popup
+        
         if (UIManager.Instance != null)
         {
             UIManager.Instance.ShowLevelUpPopup(level);
         }
 
-        // Increase hazard difficulty
+        //  hazard difficulty
         ItemSpawner spawner = FindObjectOfType<ItemSpawner>();
         if (spawner != null)
         {
@@ -107,10 +103,9 @@ public class GameManager : MonoBehaviour
     {
         Debug.Log("Speed Boost! Level " + level);
 
-        // Increase speed
+     
         currentSpeed += speedIncrease;
-
-        // Update player speed
+        
         if (playerController != null)
         {
             playerController.moveSpeed = currentSpeed;
@@ -126,26 +121,23 @@ public class GameManager : MonoBehaviour
     void GameOver()
     {
         Debug.Log("Game Over! Final Score: " + score);
-
-        // high score
-        int highScore = PlayerPrefs.GetInt("HighScore", 0);
-        if (score > highScore)
+        
+        HighScoreManager.SaveScore(score);
+    
+        // Get OLD high score 
+        int oldHighScore = PlayerPrefs.GetInt("HighScore", 0);
+    
+        // Update high score 
+        if (score > oldHighScore)
         {
-            highScore = score;
-            PlayerPrefs.SetInt("HighScore", highScore);
+            PlayerPrefs.SetInt("HighScore", score);
             PlayerPrefs.Save();
+            Debug.Log("NEW HIGH SCORE! Old: " + oldHighScore + " New: " + score);
         }
-
-        //game over screen
+        
         if (UIManager.Instance != null)
         {
-            UIManager.Instance.ShowGameOver(score, highScore);
-        }
-        else
-        {
-            Time.timeScale = 0f;
-            Debug.Log("No UIManager found! Game Over.");
-            Invoke("RestartGame", 2f);
+            UIManager.Instance.ShowGameOver(score, oldHighScore);
         }
     }
 
